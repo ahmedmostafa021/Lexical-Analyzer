@@ -1,13 +1,8 @@
-# front.py - lexical analyzer for simple arithmetic expressions using string input
-
-from io import StringIO
-
 LETTER = 0
 DIGIT = 1
 UNKNOWN = 99
 EOF = -1
 
-# Token codes
 INT_LIT = 10
 IDENT = 11
 ASSIGN_OP = 20
@@ -18,15 +13,13 @@ DIV_OP = 24
 LEFT_PAREN = 25
 RIGHT_PAREN = 26
 
-# Globals
 charClass = None
 lexeme = []
 lexLen = 0
 nextChar = ''
-token = None
 nextToken = None
-in_fp = None
-
+input_string = ''
+index = 0
 
 def addChar():
     global lexeme, lexLen
@@ -36,25 +29,25 @@ def addChar():
     else:
         print("Error - lexeme is too long")
 
-
 def getChar():
-    global nextChar, charClass, in_fp
-    nextChar = in_fp.read(1)
-    if nextChar == '':
-        charClass = EOF
-    elif nextChar.isalpha():
-        charClass = LETTER
-    elif nextChar.isdigit():
-        charClass = DIGIT
+    global nextChar, charClass, input_string, index
+    if index < len(input_string):
+        nextChar = input_string[index]
+        index += 1
+        if nextChar.isalpha():
+            charClass = LETTER
+        elif nextChar.isdigit():
+            charClass = DIGIT
+        else:
+            charClass = UNKNOWN
     else:
-        charClass = UNKNOWN
-
+        nextChar = ''
+        charClass = EOF
 
 def getNonBlank():
     global nextChar
     while nextChar.isspace():
         getChar()
-
 
 def lookup(ch):
     global nextToken
@@ -84,7 +77,6 @@ def lookup(ch):
         nextToken = UNKNOWN
     return nextToken
 
-
 def lex():
     global lexLen, lexeme, nextToken, charClass
     lexeme = []
@@ -113,19 +105,16 @@ def lex():
     print(f"Next token is: {nextToken}, Next lexeme is: {''.join(lexeme)}")
     return nextToken
 
-
-# Modified main function to accept string input
-def analyze_expression(input_string):
-    global in_fp
-    in_fp = StringIO(input_string)
+def analyze_expression(expr):
+    global input_string, index
+    input_string = expr
+    index = 0
     getChar()
     while True:
         lex()
         if nextToken == EOF:
             break
 
-
-# Example usage
 if __name__ == "__main__":
-    expr = "sum = (25 + 36) / 2"
-    analyze_expression(expr)
+    analyze_expression("sum = (25 + 36) / 2")
+
